@@ -1,0 +1,145 @@
+{% extends "pharmacy/base.html" %}
+{% block title %}নতুন বিক্রয়{% endblock %}
+{% block nav_sell %}active{% endblock %}
+{% block breadcrumb %}বিক্রয় / নতুন চালান{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="page-title">নতুন বিক্রয় চালান</div></div>
+  <a href="{% url 'bill_list' %}" class="btn btn-ghost">← ফিরে</a>
+</div>
+<div class="grid-2" style="align-items:start">
+  <div>
+    <div class="card card-body" style="margin-bottom:14px">
+      <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px">কাস্টমার ও সেটিং</div>
+      <div class="form-group">
+        <label class="form-label">কাস্টমার / রোগী</label>
+        <select class="form-input" id="customer">
+          <option value="">— Walk-in (সরাসরি বিক্রয়) —</option>
+          {% for c in customers %}<option value="{{ c.id }}">{{ c.name }} ({{ c.phone }})</option>{% endfor %}
+        </select>
+      </div>
+      <div class="grid-2">
+        <div class="form-group"><label class="form-label">ছাড় (%)</label><input type="number" class="form-input" id="discount" value="0" min="0" max="100" step="0.5" oninput="calcTotal()"></div>
+        <div class="form-group"><label class="form-label">ভ্যাট (%)</label><input type="number" class="form-input" id="tax" value="0" min="0" max="100" step="0.5" oninput="calcTotal()"></div>
+      </div>
+      <div class="form-group"><label class="form-label">নোট</label><textarea class="form-input" id="notes" rows="2" placeholder="ঐচ্ছিক..."></textarea></div>
+    </div>
+    <div class="card card-body">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em">ওষুধ যোগ করুন</span>
+        <button class="btn btn-ghost btn-sm" onclick="addRow()">+ আইটেম যোগ</button>
+      </div>
+      <div id="rows"></div>
+    </div>
+  </div>
+
+  <div class="card card-body" style="position:sticky;top:74px">
+    <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px">চালান সারসংক্ষেপ</div>
+    <table id="sum-table" style="margin-bottom:14px"><tbody id="sum-body"></tbody></table>
+    <div style="background:rgba(0,188,212,0.05);border:1px solid rgba(0,188,212,0.15);border-radius:8px;padding:14px;margin-bottom:18px">
+      <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:5px"><span>মোট</span><span class="mono" id="subtotal">৳0</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:5px"><span>ছাড়</span><span class="mono" style="color:var(--warning)" id="disc-amt">-৳0</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:12px"><span>ভ্যাট</span><span class="mono" style="color:var(--accent)" id="tax-amt">+৳0</span></div>
+      <div style="display:flex;justify-content:space-between;font-weight:700;font-size:20px;border-top:1px solid rgba(0,188,212,0.15);padding-top:10px">
+        <span>সর্বমোট</span><span class="mono" style="color:#4caf50" id="grand">৳0</span>
+      </div>
+    </div>
+    <button class="btn btn-success" style="width:100%;justify-content:center;padding:13px;font-size:15px" onclick="submitBill()">🧾 চালান তৈরি করুন</button>
+  </div>
+</div>
+
+<script>
+const meds = {
+  {% for m in medicines %}
+  {{ m.id }}: { name: "{{ m.display_name|escapejs }}", price: {{ m.selling_price }}, stock: {{ m.stock_quantity }} },
+  {% endfor %}
+};
+let n = 0;
+
+function addRow() {
+  const c = document.getElementById('rows');
+  const i = n++;
+  const d = document.createElement('div');
+  d.id = 'r' + i;
+  d.style.cssText = 'display:grid;grid-template-columns:2.5fr 1fr 1fr auto;gap:7px;margin-bottom:8px;align-items:center';
+  d.innerHTML = `
+    <select class="form-input ms" data-i="${i}" onchange="onMed(${i})">
+      <option value="">— ওষুধ নির্বাচন —</option>
+      {% for m in medicines %}<option value="{{ m.id }}">{{ m.display_name|escapejs }} ({{ m.stock_quantity }})</option>{% endfor %}
+    </select>
+    <input type="number" class="form-input qi" data-i="${i}" value="1" min="1" placeholder="পরিমাণ" oninput="calcTotal()">
+    <input type="number" class="form-input pi" data-i="${i}" value="0" step="0.01" min="0" oninput="calcTotal()">
+    <button class="btn btn-danger btn-sm" onclick="delRow(${i})">✕</button>`;
+  c.appendChild(d);
+  calcTotal();
+}
+
+function onMed(i) {
+  const s = document.querySelector(`.ms[data-i="${i}"]`);
+  const p = document.querySelector(`.pi[data-i="${i}"]`);
+  const q = document.querySelector(`.qi[data-i="${i}"]`);
+  const id = parseInt(s.value);
+  if (meds[id]) { p.value = meds[id].price; q.max = meds[id].stock; }
+  calcTotal();
+}
+
+function delRow(i) { document.getElementById('r' + i)?.remove(); calcTotal(); }
+
+function calcTotal() {
+  const ms = document.querySelectorAll('.ms');
+  const qs = document.querySelectorAll('.qi');
+  const ps = document.querySelectorAll('.pi');
+  let sub = 0;
+  const sb = document.getElementById('sum-body');
+  sb.innerHTML = '';
+  for (let i = 0; i < ms.length; i++) {
+    const id = parseInt(ms[i].value);
+    const q = parseFloat(qs[i].value) || 0;
+    const p = parseFloat(ps[i].value) || 0;
+    sub += q * p;
+    if (id && q > 0) sb.innerHTML += `<tr><td style="font-size:12px;color:var(--muted)">${meds[id]?.name || ''} ×${q}</td><td class="mono" style="text-align:right;color:#4caf50">৳${(q*p).toFixed(2)}</td></tr>`;
+  }
+  const disc = parseFloat(document.getElementById('discount').value) || 0;
+  const tax = parseFloat(document.getElementById('tax').value) || 0;
+  const da = sub * disc / 100;
+  const ta = (sub - da) * tax / 100;
+  const gd = sub - da + ta;
+  document.getElementById('subtotal').textContent = '৳' + sub.toFixed(2);
+  document.getElementById('disc-amt').textContent = '-৳' + da.toFixed(2);
+  document.getElementById('tax-amt').textContent = '+৳' + ta.toFixed(2);
+  document.getElementById('grand').textContent = '৳' + gd.toFixed(2);
+}
+
+function submitBill() {
+  const ms = document.querySelectorAll('.ms');
+  const qs = document.querySelectorAll('.qi');
+  const ps = document.querySelectorAll('.pi');
+  const items = [];
+  for (let i = 0; i < ms.length; i++) {
+    const id = parseInt(ms[i].value);
+    const q = parseInt(qs[i].value);
+    const p = parseFloat(ps[i].value);
+    if (!id || !q) continue;
+    if (q > meds[id].stock) { alert(`${meds[id].name} এর পর্যাপ্ত স্টক নেই। আছে: ${meds[id].stock}`); return; }
+    items.push({ medicine_id: id, quantity: q, price: p });
+  }
+  if (!items.length) { alert('কমপক্ষে একটি ওষুধ নির্বাচন করুন।'); return; }
+
+  fetch('{% url "bill_create" %}', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+    body: JSON.stringify({
+      customer_id: document.getElementById('customer').value || null,
+      items,
+      discount: parseFloat(document.getElementById('discount').value) || 0,
+      tax: parseFloat(document.getElementById('tax').value) || 0,
+      notes: document.getElementById('notes').value,
+    })
+  }).then(r => r.json()).then(d => {
+    if (d.success) window.location.href = `/billing/${d.bill_id}/`;
+    else alert(d.error || 'সমস্যা হয়েছে।');
+  });
+}
+addRow();
+</script>
+{% endblock %}

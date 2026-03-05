@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ bill.invoice_number }} — পল মেডিকো</title>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Hind Siliguri', sans-serif; color: #111; padding: 32px; max-width: 620px; margin: auto; }
+    .header { border-bottom: 2px solid #111; padding-bottom: 16px; margin-bottom: 20px; }
+    .pharmacy-name-en { font-family: 'Space Mono', monospace; font-size: 22px; font-weight: 700; letter-spacing: 2px; }
+    .pharmacy-name-bn { font-size: 18px; font-weight: 700; color: #333; }
+    .pharmacy-info { font-size: 12px; color: #666; margin-top: 4px; line-height: 1.6; }
+    .inv-box { text-align: right; }
+    .inv-no { font-family: 'Space Mono', monospace; font-size: 18px; font-weight: 700; color: #0097a7; }
+    .inv-date { font-size: 12px; color: #666; margin-top: 3px; }
+    .section-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #888; margin-bottom: 6px; font-family: 'Space Mono', monospace; }
+    .customer-box { background: #f8f9fa; border-radius: 6px; padding: 10px 14px; margin-bottom: 18px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+    th { text-align: left; padding: 7px 10px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 2px solid #111; color: #555; font-family: 'Space Mono', monospace; }
+    td { padding: 8px 10px; font-size: 13px; border-bottom: 1px solid #eee; }
+    td.num { text-align: right; font-family: 'Space Mono', monospace; }
+    .totals { width: 260px; margin-left: auto; border-top: 1px solid #ddd; padding-top: 10px; }
+    .totals tr td { padding: 4px 10px; font-size: 13px; }
+    .totals tr td:last-child { text-align: right; font-weight: 600; font-family: 'Space Mono', monospace; }
+    .grand-row td { font-size: 17px; font-weight: 700; border-top: 2px solid #111; padding-top: 8px; color: #0097a7; }
+    .footer { margin-top: 30px; text-align: center; font-size: 11px; color: #aaa; border-top: 1px solid #eee; padding-top: 14px; line-height: 1.7; }
+    .print-btn { display: block; margin: 20px auto 0; padding: 10px 24px; background: #0097a7; color: white; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; font-family: 'Hind Siliguri', sans-serif; }
+    @media print { .print-btn { display: none; } }
+  </style>
+</head>
+<body>
+  <div class="header" style="display:flex;justify-content:space-between;align-items:flex-start">
+    <div>
+      <div class="pharmacy-name-en">💊 POL MEDICO</div>
+      <div class="pharmacy-name-bn">পল মেডিকো</div>
+      <div class="pharmacy-info">
+        📞 {{ pharmacy.phone }}<br>
+        {{ pharmacy.address }}
+      </div>
+    </div>
+    <div class="inv-box">
+      <div class="inv-no">{{ bill.invoice_number }}</div>
+      <div class="inv-date">তারিখ: {{ bill.bill_date|date:"d M Y" }}</div>
+      <div class="inv-date">সময়: {{ bill.bill_date|date:"H:i" }}</div>
+      <div class="inv-date">স্টাফ: {{ bill.created_by.username }}</div>
+    </div>
+  </div>
+
+  {% if bill.customer %}
+  <div class="customer-box">
+    <div class="section-title">কাস্টমার / রোগী</div>
+    <div style="font-weight:600;font-size:14px">{{ bill.customer.name }}</div>
+    <div style="font-size:12px;color:#666">{{ bill.customer.phone }}</div>
+    {% if bill.customer.address %}<div style="font-size:12px;color:#666">{{ bill.customer.address }}</div>{% endif %}
+  </div>
+  {% endif %}
+
+  <div class="section-title">ওষুধের তালিকা</div>
+  <table>
+    <thead><tr><th>#</th><th>ওষুধের নাম</th><th>পরিমাণ</th><th style="text-align:right">একক মূল্য</th><th style="text-align:right">মোট</th></tr></thead>
+    <tbody>
+      {% for item in items %}
+      <tr>
+        <td style="color:#999;font-size:12px">{{ forloop.counter }}</td>
+        <td>{{ item.medicine_name }}</td>
+        <td class="num">{{ item.quantity }}</td>
+        <td class="num">৳{{ item.unit_price|floatformat:2 }}</td>
+        <td class="num" style="color:#0097a7;font-weight:600">৳{{ item.line_total|floatformat:2 }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <table class="totals">
+    <tr><td>উপমোট</td><td>৳{{ bill.subtotal|floatformat:2 }}</td></tr>
+    {% if bill.discount_amount %}<tr><td>ছাড় ({{ bill.discount_percent }}%)</td><td>-৳{{ bill.discount_amount|floatformat:2 }}</td></tr>{% endif %}
+    {% if bill.tax_amount %}<tr><td>ভ্যাট ({{ bill.tax_percent }}%)</td><td>+৳{{ bill.tax_amount|floatformat:2 }}</td></tr>{% endif %}
+    <tr class="grand-row"><td>সর্বমোট</td><td>৳{{ bill.grand_total|floatformat:2 }}</td></tr>
+  </table>
+
+  {% if bill.notes %}<div style="margin-top:14px;padding:10px;background:#f9f9f9;border-radius:4px;font-size:13px;color:#666">{{ bill.notes }}</div>{% endif %}
+
+  <div class="footer">
+    <div style="font-size:14px;font-weight:600;color:#333;margin-bottom:4px">ধন্যবাদ আমাদের থেকে ওষুধ কেনার জন্য!</div>
+    POL MEDICO — পল মেডিকো<br>
+    📞 {{ pharmacy.phone }}<br>
+    {{ pharmacy.address }}
+  </div>
+
+  <button class="print-btn" onclick="window.print()">🖨 প্রিন্ট করুন</button>
+</body>
+</html>

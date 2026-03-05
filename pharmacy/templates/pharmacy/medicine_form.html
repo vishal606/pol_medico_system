@@ -1,0 +1,44 @@
+{% extends "pharmacy/base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block nav_med %}active{% endblock %}
+{% block breadcrumb %}ওষুধ / {{ title }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="page-title">{{ title|upper }}</div></div>
+  <a href="{% url 'medicine_list' %}" class="btn btn-ghost">← ফিরে যান</a>
+</div>
+<div style="max-width:720px">
+  <div class="card card-body">
+    <form method="post">
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="alert alert-error">{{ form.non_field_errors }}</div>{% endif %}
+      <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)">মূল তথ্য</div>
+      <div class="grid-2">
+        <div class="form-group" style="grid-column:1/-1"><label class="form-label">ওষুধের নাম *</label>{{ form.name }}{% if form.name.errors %}<div style="color:var(--danger);font-size:11px;margin-top:3px">{{ form.name.errors }}</div>{% endif %}</div>
+        <div class="form-group"><label class="form-label">Generic Name</label>{{ form.generic_name }}</div>
+        <div class="form-group"><label class="form-label">Brand Name</label>{{ form.brand_name }}</div>
+        <div class="form-group"><label class="form-label">Dosage Form (ধরন)</label>{{ form.dosage_form }}</div>
+        <div class="form-group"><label class="form-label">Strength (শক্তি)</label>{{ form.strength }}</div>
+        <div class="form-group"><label class="form-label">নির্মাতা প্রতিষ্ঠান</label>{{ form.manufacturer }}</div>
+        <div class="form-group"><label class="form-label">ক্যাটাগরি</label>{{ form.category }}</div>
+        <div class="form-group"><label class="form-label">সাপ্লায়ার</label>{{ form.supplier }}</div>
+        <div class="form-group"><label class="form-label">Batch Number</label>{{ form.batch_number }}</div>
+      </div>
+      <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em;margin:18px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--border)">স্টক ও মূল্য</div>
+      <div class="grid-2">
+        <div class="form-group"><label class="form-label">স্টক পরিমাণ</label>{{ form.stock_quantity }}</div>
+        <div class="form-group"><label class="form-label">রিঅর্ডার লেভেল</label>{{ form.reorder_level }}</div>
+        <div class="form-group"><label class="form-label">ক্রয় মূল্য (৳)</label>{{ form.purchase_price }}</div>
+        <div class="form-group"><label class="form-label">বিক্রয় মূল্য (৳) *</label>{{ form.selling_price }}{% if form.selling_price.errors %}<div style="color:var(--danger);font-size:11px;margin-top:3px">{{ form.selling_price.errors }}</div>{% endif %}</div>
+        <div class="form-group"><label class="form-label">উৎপাদন তারিখ</label>{{ form.manufacture_date }}</div>
+        <div class="form-group"><label class="form-label">মেয়াদ উত্তীর্ণের তারিখ</label>{{ form.expiry_date }}</div>
+      </div>
+      <div class="form-group"><label class="form-label">বিবরণ</label>{{ form.description }}</div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:10px">
+        <a href="{% url 'medicine_list' %}" class="btn btn-ghost">বাতিল</a>
+        <button type="submit" class="btn btn-primary">💾 সংরক্ষণ করুন</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

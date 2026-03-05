@@ -1,0 +1,31 @@
+{% extends "pharmacy/base.html" %}
+{% block title %}সাপ্লায়ার{% endblock %}
+{% block nav_sup %}active{% endblock %}
+{% block breadcrumb %}সাপ্লায়ার{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="page-title">সাপ্লায়ার</div><div class="page-sub">{{ suppliers|length }} সাপ্লায়ার</div></div>
+  <div style="display:flex;gap:8px">
+    <form method="get"><div class="search-wrap"><span class="search-icon">🔍</span><input name="q" class="form-input" placeholder="সাপ্লায়ার খুঁজুন..." value="{{ q }}" style="width:200px"></div></form>
+    <a href="{% url 'supplier_create' %}" class="btn btn-primary">+ নতুন সাপ্লায়ার</a>
+  </div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px">
+  {% for sup in suppliers %}
+  <div class="card card-body">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+      <div><div style="font-weight:600;font-size:14px">{{ sup.name }}</div><div style="font-size:12px;color:var(--muted);margin-top:2px">{{ sup.contact_person }}</div></div>
+      <span class="tag {% if sup.status == 'active' %}tag-green{% else %}tag-gray{% endif %}">{{ sup.get_status_display }}</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted);margin-bottom:12px">
+      {% if sup.phone %}<div>📞 {{ sup.phone }}</div>{% endif %}
+      {% if sup.email %}<div>✉️ {{ sup.email }}</div>{% endif %}
+      {% if sup.address %}<div>📍 {{ sup.address }}</div>{% endif %}
+      <div>💊 {{ sup.medicine_count }} ওষুধ</div>
+    </div>
+    <div style="display:flex;gap:7px"><a href="{% url 'supplier_edit' sup.pk %}" class="btn btn-ghost btn-sm" style="flex:1;justify-content:center">সম্পাদনা</a><a href="{% url 'supplier_delete' sup.pk %}" class="btn btn-danger btn-sm">মুছুন</a></div>
+  </div>
+  {% empty %}<div style="grid-column:1/-1;text-align:center;padding:50px;color:var(--muted)">কোনো সাপ্লায়ার নেই। <a href="{% url 'supplier_create' %}" style="color:var(--accent)">যোগ করুন?</a></div>
+  {% endfor %}
+</div>
+{% endblock %}

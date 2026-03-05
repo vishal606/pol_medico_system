@@ -1,0 +1,92 @@
+{% extends "pharmacy/base.html" %}
+{% block title %}রিপোর্ট{% endblock %}
+{% block nav_rep %}active{% endblock %}
+{% block breadcrumb %}রিপোর্ট ও বিশ্লেষণ{% endblock %}
+{% block content %}
+<div class="page-header"><div><div class="page-title">রিপোর্ট ও বিশ্লেষণ</div><div class="page-sub">পল মেডিকো — ব্যবসায়িক সারসংক্ষেপ</div></div></div>
+
+<div class="grid-4" style="margin-bottom:18px">
+  <div class="card stat-card" style="--acc:#4caf50"><div class="stat-label">আজকের আয়</div><div class="stat-value">৳{{ daily_revenue|floatformat:0 }}</div><div class="stat-sub">আজ</div></div>
+  <div class="card stat-card" style="--acc:#00bcd4"><div class="stat-label">মাসিক আয়</div><div class="stat-value">৳{{ monthly_revenue|floatformat:0 }}</div><div class="stat-sub">এই মাসে</div></div>
+  <div class="card stat-card" style="--acc:#ab47bc"><div class="stat-label">বার্ষিক আয়</div><div class="stat-value">৳{{ yearly_revenue|floatformat:0 }}</div><div class="stat-sub">এই বছর</div></div>
+  <div class="card stat-card" style="--acc:#ff9800"><div class="stat-label">গড় চালান</div><div class="stat-value">৳{{ avg_bill|floatformat:0 }}</div><div class="stat-sub">{{ total_bills }} টি চালান</div></div>
+</div>
+
+<div class="grid-3" style="margin-bottom:18px">
+  <div class="card stat-card" style="--acc:#64748b"><div class="stat-label">মোট ওষুধ</div><div class="stat-value">{{ total_medicines }}</div></div>
+  <div class="card stat-card" style="--acc:#64748b"><div class="stat-label">মোট রোগী</div><div class="stat-value">{{ total_customers }}</div></div>
+  <div class="card stat-card" style="--acc:#64748b"><div class="stat-label">সক্রিয় সাপ্লায়ার</div><div class="stat-value">{{ total_suppliers }}</div></div>
+</div>
+
+<div class="grid-2" style="margin-bottom:18px">
+  <div class="card">
+    <div class="card-header"><span class="card-title">১২ মাসের বিক্রয় (৳)</span></div>
+    <div class="card-body"><canvas id="chart12" height="150"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">সর্বাধিক বিক্রিত ওষুধ</span></div>
+    <table>
+      <thead><tr><th>#</th><th>ওষুধ</th><th>বিক্রয় পরিমাণ</th></tr></thead>
+      <tbody>
+        {% for med in top_medicines %}
+        <tr><td class="mono" style="color:var(--muted)">#{{ forloop.counter }}</td><td style="font-size:13px">{{ med.medicine_name }}</td><td><span class="tag tag-blue">{{ med.total_qty }}</span></td></tr>
+        {% empty %}<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:20px">কোনো বিক্রয় ডেটা নেই</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-header"><span class="card-title">⚠️ কম স্টক আইটেম</span></div>
+    <table>
+      <thead><tr><th>ওষুধ</th><th>স্টক</th><th>রিঅর্ডার</th></tr></thead>
+      <tbody>
+        {% for med in low_stock_items %}
+        <tr><td><a href="{% url 'medicine_detail' med.pk %}" style="color:var(--text);text-decoration:none;font-size:13px">{{ med.name }} {{ med.strength }}</a></td><td><span class="tag tag-orange">{{ med.stock_quantity }}</span></td><td style="color:var(--muted);font-size:12px">{{ med.reorder_level }}</td></tr>
+        {% empty %}<tr><td colspan="3" style="text-align:center;color:#4caf50;padding:18px">✅ সব স্টক ঠিক আছে!</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">📅 ৯০ দিনে মেয়াদ শেষ</span></div>
+    <table>
+      <thead><tr><th>ওষুধ</th><th>মেয়াদ উত্তীর্ণ</th></tr></thead>
+      <tbody>
+        {% for med in expiring_items %}
+        <tr><td><a href="{% url 'medicine_detail' med.pk %}" style="color:var(--text);text-decoration:none;font-size:13px">{{ med.name }} {{ med.strength }}</a></td><td><span class="tag tag-red">{{ med.expiry_date }}</span></td></tr>
+        {% empty %}<tr><td colspan="2" style="text-align:center;color:#4caf50;padding:18px">✅ কোনো ওষুধ শীঘ্রই মেয়াদোত্তীর্ণ হচ্ছে না!</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const d = {{ chart_data|safe }};
+const c = document.getElementById('chart12');
+const ctx = c.getContext('2d');
+const W = c.offsetWidth; const H = 150;
+c.width = W; c.height = H;
+const max = Math.max(...d.map(x => x.revenue), 1);
+const bw = W / d.length;
+d.forEach((item, i) => {
+  const h = Math.max((item.revenue / max) * (H - 34), item.revenue > 0 ? 2 : 0);
+  const x = i * bw + bw * 0.12; const w = bw * 0.76; const y = H - h - 16;
+  const g = ctx.createLinearGradient(0, y, 0, H - 16);
+  const last = i === d.length - 1;
+  g.addColorStop(0, last ? '#00bcd4' : 'rgba(0,188,212,0.35)');
+  g.addColorStop(1, 'rgba(0,188,212,0.03)');
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  if (ctx.roundRect) ctx.roundRect(x, y, w, h, [2,2,0,0]); else ctx.rect(x, y, w, h);
+  ctx.fill();
+  ctx.fillStyle = '#5a7080'; ctx.font = '9px Space Mono'; ctx.textAlign = 'center';
+  ctx.fillText(item.month, x + w/2, H - 2);
+});
+</script>
+{% endblock %}

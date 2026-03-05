@@ -1,0 +1,31 @@
+{% extends "pharmacy/base.html" %}
+{% block title %}রোগী / কাস্টমার{% endblock %}
+{% block nav_cust %}active{% endblock %}
+{% block breadcrumb %}রোগী / কাস্টমার{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="page-title">রোগী / কাস্টমার</div><div class="page-sub">{{ customers|length }} জন নিবন্ধিত</div></div>
+  <div style="display:flex;gap:8px">
+    <form method="get"><div class="search-wrap"><span class="search-icon">🔍</span><input name="q" class="form-input" placeholder="নাম বা ফোন..." value="{{ q }}" style="width:200px"></div></form>
+    <a href="{% url 'customer_create' %}" class="btn btn-primary">+ নতুন রোগী</a>
+  </div>
+</div>
+<div class="card">
+  <table>
+    <thead><tr><th>নাম</th><th>ফোন</th><th>ঠিকানা</th><th>মোট কেনাকাটা</th><th>চালান সংখ্যা</th><th>কার্যক্রম</th></tr></thead>
+    <tbody>
+      {% for c in customers %}
+      <tr>
+        <td><a href="{% url 'customer_detail' c.pk %}" style="font-weight:600;color:var(--text);text-decoration:none">{{ c.name }}</a></td>
+        <td class="mono" style="font-size:12px">{{ c.phone|default:"—" }}</td>
+        <td style="color:var(--muted);font-size:12px">{{ c.address|truncatechars:30|default:"—" }}</td>
+        <td class="mono" style="color:#4caf50;font-weight:700">৳{{ c.total_purchases|floatformat:0 }}</td>
+        <td><span class="tag tag-blue">{{ c.bills_count }}</span></td>
+        <td><div style="display:flex;gap:5px"><a href="{% url 'customer_edit' c.pk %}" class="btn btn-ghost btn-sm">✏️</a><a href="{% url 'customer_delete' c.pk %}" class="btn btn-danger btn-sm">🗑</a></div></td>
+      </tr>
+      {% empty %}<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--muted)">কোনো রোগী নেই। <a href="{% url 'customer_create' %}" style="color:var(--accent)">যোগ করুন?</a></td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "pharmacy/base.html" %}
+{% block title %}চালান তালিকা{% endblock %}
+{% block nav_bill %}active{% endblock %}
+{% block breadcrumb %}চালান তালিকা{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><div class="page-title">বিল / চালান</div><div class="page-sub">{{ bills|length }} টি চালান</div></div>
+  <div style="display:flex;gap:8px">
+    <form method="get" style="display:flex;gap:8px">
+      <div class="search-wrap"><span class="search-icon">🔍</span><input name="q" class="form-input" placeholder="চালান খুঁজুন..." value="{{ q }}" style="width:190px"></div>
+      <select name="status" class="form-input" style="width:130px" onchange="this.form.submit()">
+        <option value="">সব</option>
+        <option value="paid" {% if status == 'paid' %}selected{% endif %}>পরিশোধিত</option>
+        <option value="pending" {% if status == 'pending' %}selected{% endif %}>বাকি</option>
+        <option value="cancelled" {% if status == 'cancelled' %}selected{% endif %}>বাতিল</option>
+      </select>
+    </form>
+    <a href="{% url 'bill_create' %}" class="btn btn-success">+ নতুন বিক্রয়</a>
+  </div>
+</div>
+<div class="card">
+  <table>
+    <thead><tr><th>চালান নং</th><th>কাস্টমার</th><th>তারিখ</th><th>আইটেম</th><th>মোট</th><th>স্ট্যাটাস</th><th>কার্যক্রম</th></tr></thead>
+    <tbody>
+      {% for bill in bills %}
+      <tr>
+        <td><a href="{% url 'bill_detail' bill.pk %}" class="mono" style="color:var(--accent);font-size:12px">{{ bill.invoice_number }}</a></td>
+        <td style="font-size:13px">{{ bill.customer.name|default:"Walk-in" }}</td>
+        <td style="color:var(--muted);font-size:12px">{{ bill.bill_date|date:"d M Y, H:i" }}</td>
+        <td style="color:var(--muted)">{{ bill.items.count }}</td>
+        <td class="mono" style="color:#4caf50;font-weight:700">৳{{ bill.grand_total|floatformat:2 }}</td>
+        <td><span class="tag {% if bill.status == 'paid' %}tag-green{% elif bill.status == 'pending' %}tag-orange{% else %}tag-gray{% endif %}">{{ bill.get_status_display }}</span></td>
+        <td><div style="display:flex;gap:5px"><a href="{% url 'bill_detail' bill.pk %}" class="btn btn-ghost btn-sm">দেখুন</a><a href="{% url 'bill_print' bill.pk %}" class="btn btn-ghost btn-sm" target="_blank">🖨</a></div></td>
+      </tr>
+      {% empty %}<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--muted)">কোনো চালান নেই। <a href="{% url 'bill_create' %}" style="color:var(--accent)">তৈরি করুন?</a></td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

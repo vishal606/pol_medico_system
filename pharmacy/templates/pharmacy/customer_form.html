@@ -1,0 +1,13 @@
+{% extends "pharmacy/base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block nav_cust %}active{% endblock %}
+{% block content %}
+<div class="page-header"><div><div class="page-title">{{ title|upper }}</div></div><a href="{% url 'customer_list' %}" class="btn btn-ghost">← ফিরে</a></div>
+<div style="max-width:540px"><div class="card card-body"><form method="post">{% csrf_token %}
+  <div class="form-group"><label class="form-label">রোগীর নাম *</label>{{ form.name }}</div>
+  <div class="grid-2"><div class="form-group"><label class="form-label">ফোন নম্বর</label>{{ form.phone }}</div><div class="form-group"><label class="form-label">জন্ম তারিখ</label>{{ form.date_of_birth }}</div></div>
+  <div class="form-group"><label class="form-label">ইমেইল</label>{{ form.email }}</div>
+  <div class="form-group"><label class="form-label">ঠিকানা</label>{{ form.address }}</div>
+  <div style="display:flex;gap:10px;justify-content:flex-end"><a href="{% url 'customer_list' %}" class="btn btn-ghost">বাতিল</a><button type="submit" class="btn btn-primary">💾 সংরক্ষণ</button></div>
+</form></div></div>
+{% endblock %}
