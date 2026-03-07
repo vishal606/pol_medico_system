@@ -1,49 +1,53 @@
 {% extends "pharmacy/base.html" %}
 {% block title %}{{ medicine.name }}{% endblock %}
 {% block nav_med %}active{% endblock %}
+{% block bn_med %}active{% endblock %}
 {% block breadcrumb %}ওষুধ / {{ medicine.name }}{% endblock %}
 {% block content %}
 <div class="page-header">
   <div><div class="page-title">{{ medicine.name|upper }}{% if medicine.strength %} {{ medicine.strength }}{% endif %}</div><div class="page-sub">{{ medicine.generic_name }} · {{ medicine.dosage_form }}</div></div>
-  <div style="display:flex;gap:8px"><a href="{% url 'medicine_list' %}" class="btn btn-ghost">← ফিরে</a><a href="{% url 'medicine_edit' medicine.pk %}" class="btn btn-primary">✏️ সম্পাদনা</a></div>
+  <div class="page-actions"><a href="{% url 'medicine_list' %}" class="btn btn-ghost btn-sm">← ফিরে</a><a href="{% url 'medicine_edit' medicine.pk %}" class="btn btn-primary">✏️ সম্পাদনা</a></div>
 </div>
 <div class="grid-2" style="align-items:start">
   <div>
     <div class="card card-body" style="margin-bottom:14px">
-      <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px">তথ্য</div>
+      <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);text-transform:uppercase;margin-bottom:12px">তথ্য</div>
       <div class="grid-2" style="gap:14px">
         <div><div style="font-size:10px;color:var(--muted)">ক্যাটাগরি</div><div style="margin-top:3px">{% if medicine.category %}<span class="tag tag-blue">{{ medicine.category }}</span>{% else %}—{% endif %}</div></div>
-        <div><div style="font-size:10px;color:var(--muted)">নির্মাতা</div><div style="margin-top:3px;font-size:13px">{{ medicine.manufacturer|default:"—" }}</div></div>
-        <div><div style="font-size:10px;color:var(--muted)">ক্রয় মূল্য</div><div class="mono" style="margin-top:3px;color:var(--muted)">৳{{ medicine.purchase_price|floatformat:2 }}</div></div>
-        <div><div style="font-size:10px;color:var(--muted)">বিক্রয় মূল্য</div><div class="mono" style="margin-top:3px;color:#4caf50;font-weight:700">৳{{ medicine.selling_price|floatformat:2 }}</div></div>
-        <div><div style="font-size:10px;color:var(--muted)">স্টক</div><div class="mono" style="margin-top:3px;color:{% if medicine.is_low_stock %}var(--warning){% else %}var(--text){% endif %}">{{ medicine.stock_quantity }} পিস</div></div>
+        <div><div style="font-size:10px;color:var(--muted)">নির্মাতা</div><div style="font-size:13px;margin-top:3px">{{ medicine.manufacturer|default:"—" }}</div></div>
+        <div><div style="font-size:10px;color:var(--muted)">ক্রয় মূল্য</div><div class="mono" style="color:var(--muted);margin-top:3px">৳{{ medicine.purchase_price|floatformat:2 }}</div></div>
+        <div><div style="font-size:10px;color:var(--muted)">বিক্রয় মূল্য</div><div class="mono" style="color:#4caf50;font-weight:700;margin-top:3px">৳{{ medicine.selling_price|floatformat:2 }}</div></div>
+        <div><div style="font-size:10px;color:var(--muted)">স্টক পরিমাণ</div><div class="mono" style="margin-top:3px;color:{% if medicine.is_low_stock %}var(--warning){% else %}var(--text){% endif %}">{{ medicine.stock_quantity }} পিস</div></div>
         <div><div style="font-size:10px;color:var(--muted)">মেয়াদ উত্তীর্ণ</div><div style="margin-top:3px;font-size:12px;color:{% if medicine.is_expired %}var(--danger){% elif medicine.is_expiring_soon %}var(--warning){% else %}var(--muted){% endif %}">{{ medicine.expiry_date|default:"—" }}</div></div>
       </div>
+      {% if medicine.is_low_stock or medicine.is_expiring_soon or medicine.is_expired %}
+      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+        {% if medicine.stock_quantity == 0 %}<div style="background:rgba(244,67,54,0.08);border:1px solid rgba(244,67,54,0.2);border-radius:7px;padding:8px 14px;font-size:12px;color:var(--danger)">❌ স্টক শেষ</div>
+        {% elif medicine.is_low_stock %}<div style="background:rgba(255,152,0,0.08);border:1px solid rgba(255,152,0,0.2);border-radius:7px;padding:8px 14px;font-size:12px;color:var(--warning)">⚠️ কম স্টক</div>{% endif %}
+        {% if medicine.is_expired %}<div style="background:rgba(244,67,54,0.1);border:1px solid rgba(244,67,54,0.3);border-radius:7px;padding:8px 14px;font-size:12px;color:var(--danger)">📅 মেয়াদ শেষ</div>
+        {% elif medicine.is_expiring_soon %}<div style="background:rgba(255,152,0,0.08);border:1px solid rgba(255,152,0,0.2);border-radius:7px;padding:8px 14px;font-size:12px;color:var(--warning)">📅 শীঘ্রই মেয়াদ শেষ</div>{% endif %}
+      </div>
+      {% endif %}
     </div>
-    {% if medicine.is_low_stock or medicine.is_expiring_soon or medicine.is_expired %}
-    <div style="display:flex;gap:10px">
-      {% if medicine.stock_quantity == 0 %}<div style="flex:1;background:rgba(244,67,54,0.08);border:1px solid rgba(244,67,54,0.2);border-radius:7px;padding:10px;text-align:center"><div>❌</div><div style="font-size:12px;color:var(--danger);margin-top:3px">স্টক শেষ</div></div>{% elif medicine.is_low_stock %}<div style="flex:1;background:rgba(255,152,0,0.08);border:1px solid rgba(255,152,0,0.2);border-radius:7px;padding:10px;text-align:center"><div>⚠️</div><div style="font-size:12px;color:var(--warning);margin-top:3px">কম স্টক</div></div>{% endif %}
-      {% if medicine.is_expired %}<div style="flex:1;background:rgba(244,67,54,0.1);border:1px solid rgba(244,67,54,0.3);border-radius:7px;padding:10px;text-align:center"><div>📅</div><div style="font-size:12px;color:var(--danger);margin-top:3px">মেয়াদ শেষ</div></div>
-      {% elif medicine.is_expiring_soon %}<div style="flex:1;background:rgba(255,152,0,0.08);border:1px solid rgba(255,152,0,0.2);border-radius:7px;padding:10px;text-align:center"><div>📅</div><div style="font-size:12px;color:var(--warning);margin-top:3px">মেয়াদ শেষ হচ্ছে</div></div>{% endif %}
-    </div>
-    {% endif %}
   </div>
   <div class="card">
     <div class="card-header"><span class="card-title">স্টক লেনদেনের ইতিহাস</span></div>
-    <table>
-      <thead><tr><th>ধরন</th><th>পরিমাণ</th><th>রেফারেন্স</th><th>তারিখ</th></tr></thead>
-      <tbody>
-        {% for tx in transactions %}
-        <tr>
-          <td><span class="tag {% if tx.transaction_type == 'sale' %}tag-red{% elif tx.transaction_type == 'purchase' %}tag-green{% else %}tag-blue{% endif %}">{{ tx.get_transaction_type_display }}</span></td>
-          <td class="mono" style="color:{% if tx.quantity < 0 %}var(--danger){% else %}#4caf50{% endif %}">{% if tx.quantity > 0 %}+{% endif %}{{ tx.quantity }}</td>
-          <td style="color:var(--muted);font-size:12px">{{ tx.reference|default:"—" }}</td>
-          <td style="color:var(--muted);font-size:11px">{{ tx.created_at|date:"d M Y H:i" }}</td>
-        </tr>
-        {% empty %}<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px">কোনো লেনদেন নেই</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>ধরন</th><th>পরিমাণ</th><th class="hide-xs">রেফারেন্স</th><th>তারিখ</th></tr></thead>
+        <tbody>
+          {% for tx in transactions %}
+          <tr>
+            <td><span class="tag {% if tx.transaction_type == 'sale' %}tag-red{% elif tx.transaction_type == 'purchase' %}tag-green{% else %}tag-blue{% endif %}">{{ tx.get_transaction_type_display }}</span></td>
+            <td class="mono" style="color:{% if tx.quantity < 0 %}var(--danger){% else %}#4caf50{% endif %}">{% if tx.quantity > 0 %}+{% endif %}{{ tx.quantity }}</td>
+            <td class="hide-xs" style="color:var(--muted);font-size:11px">{{ tx.reference|default:"—" }}</td>
+            <td style="color:var(--muted);font-size:11px">{{ tx.created_at|date:"d M Y" }}</td>
+          </tr>
+          {% empty %}<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px">কোনো লেনদেন নেই</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
 {% endblock %}

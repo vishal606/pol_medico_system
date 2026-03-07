@@ -1,60 +1,114 @@
 {% extends "pharmacy/base.html" %}
 {% block title %}ওষুধ তালিকা{% endblock %}
 {% block nav_med %}active{% endblock %}
+{% block bn_med %}active{% endblock %}
 {% block breadcrumb %}ওষুধ তালিকা{% endblock %}
+
 {% block content %}
 <div class="page-header">
   <div><div class="page-title">ওষুধ তালিকা</div><div class="page-sub">{{ medicines|length }} টি ওষুধ</div></div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-    <form method="get" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-      <div class="search-wrap"><span class="search-icon">🔍</span><input name="q" class="form-input" placeholder="ওষুধ খুঁজুন..." value="{{ q }}" style="width:200px"></div>
-      <select name="category" class="form-input" style="width:160px" onchange="this.form.submit()">
-        <option value="">সব ক্যাটাগরি</option>
-        {% for cat in categories %}<option value="{{ cat.id }}" {% if selected_category == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>{% endfor %}
-      </select>
-      <select name="stock" class="form-input" style="width:140px" onchange="this.form.submit()">
-        <option value="">সব স্টক</option>
-        <option value="low" {% if stock_filter == 'low' %}selected{% endif %}>কম স্টক</option>
-        <option value="out" {% if stock_filter == 'out' %}selected{% endif %}>স্টক শেষ</option>
-        <option value="expiring" {% if stock_filter == 'expiring' %}selected{% endif %}>মেয়াদ শেষ হচ্ছে</option>
-      </select>
-      <button type="submit" class="btn btn-ghost">ফিল্টার</button>
-    </form>
+  <div class="page-actions">
     <a href="{% url 'medicine_create' %}" class="btn btn-primary">+ নতুন ওষুধ</a>
   </div>
 </div>
-<div class="card">
-  <table>
-    <thead><tr><th>ওষুধের নাম</th><th>ধরন</th><th>নির্মাতা</th><th>স্টক</th><th>বিক্রয় মূল্য</th><th>মেয়াদ</th><th>স্ট্যাটাস</th><th>কার্যক্রম</th></tr></thead>
-    <tbody>
-      {% for med in medicines %}
-      <tr>
-        <td>
-          <a href="{% url 'medicine_detail' med.pk %}" style="font-weight:600;color:var(--text);text-decoration:none">{{ med.name }}{% if med.strength %} {{ med.strength }}{% endif %}</a>
-          {% if med.generic_name %}<div style="font-size:11px;color:var(--muted)">{{ med.generic_name }}</div>{% endif %}
-        </td>
-        <td>{% if med.dosage_form %}<span class="tag tag-blue">{{ med.dosage_form }}</span>{% endif %}</td>
-        <td style="font-size:12px;color:var(--muted)">{{ med.manufacturer|default:med.supplier|default:"—" }}</td>
-        <td>
-          <span class="mono" style="color:{% if med.stock_quantity == 0 %}var(--danger){% elif med.is_low_stock %}var(--warning){% else %}var(--text){% endif %}">{{ med.stock_quantity }}</span>
-          {% if med.stock_quantity == 0 %}<span class="tag tag-red" style="margin-left:4px">শেষ</span>
-          {% elif med.is_low_stock %}<span class="tag tag-orange" style="margin-left:4px">কম</span>{% endif %}
-        </td>
-        <td class="mono" style="color:#4caf50;font-weight:600">৳{{ med.selling_price|floatformat:2 }}</td>
-        <td style="font-size:12px;color:{% if med.is_expired %}var(--danger){% elif med.is_expiring_soon %}var(--warning){% else %}var(--muted){% endif %}">
-          {{ med.expiry_date|default:"—" }}{% if med.is_expired %} <span class="tag tag-red">শেষ</span>{% endif %}
-        </td>
-        <td>{% if med.stock_quantity > 0 %}<span class="tag tag-green">আছে</span>{% else %}<span class="tag tag-red">নেই</span>{% endif %}</td>
-        <td>
-          <div style="display:flex;gap:5px">
-            <a href="{% url 'medicine_edit' med.pk %}" class="btn btn-ghost btn-sm">✏️</a>
-            <a href="{% url 'medicine_delete' med.pk %}" class="btn btn-danger btn-sm">🗑</a>
-          </div>
-        </td>
-      </tr>
-      {% empty %}<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted)">কোনো ওষুধ পাওয়া যায়নি। <a href="{% url 'medicine_create' %}" style="color:var(--accent)">যোগ করুন?</a></td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
+
+<!-- Search & filters -->
+<form method="get" style="margin-bottom:14px">
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <div class="search-wrap" style="flex:1;min-width:160px">
+      <span class="search-icon">🔍</span>
+      <input name="q" class="form-input" placeholder="ওষুধ খুঁজুন..." value="{{ q }}">
+    </div>
+    <select name="category" class="form-input" style="flex:1;min-width:130px" onchange="this.form.submit()">
+      <option value="">সব ক্যাটাগরি</option>
+      {% for cat in categories %}<option value="{{ cat.id }}" {% if selected_category == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>{% endfor %}
+    </select>
+    <select name="stock" class="form-input" style="flex:1;min-width:110px" onchange="this.form.submit()">
+      <option value="">সব স্টক</option>
+      <option value="low" {% if stock_filter == 'low' %}selected{% endif %}>কম স্টক</option>
+      <option value="out" {% if stock_filter == 'out' %}selected{% endif %}>স্টক শেষ</option>
+      <option value="expiring" {% if stock_filter == 'expiring' %}selected{% endif %}>মেয়াদ শেষ হচ্ছে</option>
+    </select>
+  </div>
+</form>
+
+<!-- Desktop table -->
+<div class="card desktop-table" style="margin-bottom:14px">
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>ওষুধের নাম</th><th>ধরন</th><th class="hide-xs">নির্মাতা</th><th>স্টক</th><th>মূল্য (৳)</th><th class="hide-xs">মেয়াদ</th><th>কার্যক্রম</th></tr></thead>
+      <tbody>
+        {% for med in medicines %}
+        <tr>
+          <td>
+            <a href="{% url 'medicine_detail' med.pk %}" style="font-weight:600;color:var(--text);text-decoration:none;font-size:13px">{{ med.name }}{% if med.strength %} {{ med.strength }}{% endif %}</a>
+            {% if med.generic_name %}<div style="font-size:11px;color:var(--muted)">{{ med.generic_name }}</div>{% endif %}
+          </td>
+          <td>{% if med.dosage_form %}<span class="tag tag-blue">{{ med.dosage_form }}</span>{% endif %}</td>
+          <td class="hide-xs" style="font-size:12px;color:var(--muted)">{{ med.manufacturer|default:"—"|truncatechars:18 }}</td>
+          <td>
+            <span class="mono" style="font-size:13px;color:{% if med.stock_quantity == 0 %}var(--danger){% elif med.is_low_stock %}var(--warning){% else %}var(--text){% endif %}">{{ med.stock_quantity }}</span>
+            {% if med.stock_quantity == 0 %}<div><span class="tag tag-red" style="font-size:9px">শেষ</span></div>
+            {% elif med.is_low_stock %}<div><span class="tag tag-orange" style="font-size:9px">কম</span></div>{% endif %}
+          </td>
+          <td class="mono" style="color:#4caf50;font-weight:600;font-size:13px">৳{{ med.selling_price|floatformat:2 }}</td>
+          <td class="hide-xs" style="font-size:11px;color:{% if med.is_expired %}var(--danger){% elif med.is_expiring_soon %}var(--warning){% else %}var(--muted){% endif %}">{{ med.expiry_date|default:"—" }}</td>
+          <td>
+            <div style="display:flex;gap:4px">
+              <a href="{% url 'medicine_edit' med.pk %}" class="btn btn-ghost btn-sm">✏️</a>
+              <a href="{% url 'medicine_delete' med.pk %}" class="btn btn-danger btn-sm">🗑</a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--muted)">কোনো ওষুধ পাওয়া যায়নি। <a href="{% url 'medicine_create' %}" style="color:var(--accent)">যোগ করুন?</a></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
+
+<!-- Mobile card view -->
+<div class="mobile-cards">
+  {% for med in medicines %}
+  <div class="card" style="margin-bottom:10px">
+    <div class="card-body" style="padding:14px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+        <div style="flex:1">
+          <a href="{% url 'medicine_detail' med.pk %}" style="font-weight:700;font-size:14px;color:var(--text);text-decoration:none">{{ med.name }}{% if med.strength %} {{ med.strength }}{% endif %}</a>
+          {% if med.generic_name %}<div style="font-size:12px;color:var(--muted);margin-top:2px">{{ med.generic_name }}</div>{% endif %}
+          {% if med.manufacturer %}<div style="font-size:11px;color:var(--muted)">{{ med.manufacturer }}</div>{% endif %}
+        </div>
+        <div style="text-align:right;flex-shrink:0;margin-left:10px">
+          <div class="mono" style="font-size:16px;color:#4caf50;font-weight:700">৳{{ med.selling_price|floatformat:0 }}</div>
+          {% if med.dosage_form %}<div><span class="tag tag-blue" style="font-size:9px">{{ med.dosage_form }}</span></div>{% endif %}
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:12px;color:var(--muted)">স্টক:</span>
+          <span class="mono" style="font-size:13px;font-weight:600;color:{% if med.stock_quantity == 0 %}var(--danger){% elif med.is_low_stock %}var(--warning){% else %}var(--accent2){% endif %}">{{ med.stock_quantity }}</span>
+          {% if med.stock_quantity == 0 %}<span class="tag tag-red">শেষ</span>
+          {% elif med.is_low_stock %}<span class="tag tag-orange">কম</span>
+          {% else %}<span class="tag tag-green">আছে</span>{% endif %}
+        </div>
+        <div style="display:flex;gap:6px">
+          <a href="{% url 'medicine_edit' med.pk %}" class="btn btn-ghost btn-sm">✏️ সম্পাদনা</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="card card-body" style="text-align:center;padding:40px;color:var(--muted)">কোনো ওষুধ নেই। <a href="{% url 'medicine_create' %}" style="color:var(--accent)">যোগ করুন?</a></div>
+  {% endfor %}
+</div>
+
+<style>
+  .desktop-table { display: block; }
+  .mobile-cards { display: none; }
+  @media (max-width: 600px) {
+    .desktop-table { display: none; }
+    .mobile-cards { display: block; }
+  }
+</style>
 {% endblock %}

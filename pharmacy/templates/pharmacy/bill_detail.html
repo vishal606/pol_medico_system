@@ -4,39 +4,40 @@
 {% block breadcrumb %}চালান / {{ bill.invoice_number }}{% endblock %}
 {% block content %}
 <div class="page-header">
-  <div><div class="page-title">{{ bill.invoice_number }}</div><div class="page-sub">{{ bill.bill_date|date:"d M Y, H:i" }} · {{ bill.created_by.username }}</div></div>
-  <div style="display:flex;gap:8px"><a href="{% url 'bill_list' %}" class="btn btn-ghost">← ফিরে</a><a href="{% url 'bill_print' bill.pk %}" class="btn btn-primary" target="_blank">🖨 প্রিন্ট</a></div>
+  <div><div class="page-title">{{ bill.invoice_number }}</div><div class="page-sub">{{ bill.bill_date|date:"d M Y, H:i" }}</div></div>
+  <div class="page-actions"><a href="{% url 'bill_list' %}" class="btn btn-ghost btn-sm">← ফিরে</a><a href="{% url 'bill_print' bill.pk %}" class="btn btn-primary" target="_blank">🖨 প্রিন্ট</a></div>
 </div>
 <div class="grid-2" style="align-items:start">
   <div>
     <div class="card card-body" style="margin-bottom:14px">
-      <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px">কাস্টমার</div>
-      {% if bill.customer %}<div style="font-weight:600">{{ bill.customer.name }}</div><div style="color:var(--muted);font-size:13px;margin-top:3px">{{ bill.customer.phone }}</div>
+      <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);text-transform:uppercase;margin-bottom:10px">কাস্টমার</div>
+      {% if bill.customer %}<div style="font-weight:600;font-size:15px">{{ bill.customer.name }}</div><div style="color:var(--muted);font-size:13px;margin-top:3px">{{ bill.customer.phone }}</div>
       {% else %}<span style="color:var(--muted)">Walk-in কাস্টমার</span>{% endif %}
     </div>
     <div class="card">
       <div class="card-header"><span class="card-title">ওষুধের তালিকা</span></div>
-      <table>
-        <thead><tr><th>ওষুধ</th><th>পরিমাণ</th><th>মূল্য</th><th style="text-align:right">মোট</th></tr></thead>
-        <tbody>
-          {% for item in items %}
-          <tr>
-            <td style="font-weight:500;font-size:13px">{{ item.medicine_name }}</td>
-            <td class="mono">{{ item.quantity }}</td>
-            <td class="mono" style="color:var(--muted)">৳{{ item.unit_price|floatformat:2 }}</td>
-            <td class="mono" style="text-align:right;color:#4caf50">৳{{ item.line_total|floatformat:2 }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>ওষুধ</th><th>পরিমাণ</th><th style="text-align:right">মোট</th></tr></thead>
+          <tbody>
+            {% for item in items %}
+            <tr>
+              <td style="font-size:13px">{{ item.medicine_name }}<div style="font-size:11px;color:var(--muted)">৳{{ item.unit_price|floatformat:2 }} × {{ item.quantity }}</div></td>
+              <td class="mono">{{ item.quantity }}</td>
+              <td class="mono" style="text-align:right;color:#4caf50">৳{{ item.line_total|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
   <div class="card card-body">
-    <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px">হিসাব</div>
+    <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);text-transform:uppercase;margin-bottom:14px">হিসাব</div>
     <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px"><span style="color:var(--muted)">উপমোট</span><span class="mono">৳{{ bill.subtotal|floatformat:2 }}</span></div>
     <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px"><span style="color:var(--muted)">ছাড় ({{ bill.discount_percent }}%)</span><span class="mono" style="color:var(--warning)">-৳{{ bill.discount_amount|floatformat:2 }}</span></div>
     <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:12px"><span style="color:var(--muted)">ভ্যাট ({{ bill.tax_percent }}%)</span><span class="mono" style="color:var(--accent)">+৳{{ bill.tax_amount|floatformat:2 }}</span></div>
-    <div style="display:flex;justify-content:space-between;font-weight:700;font-size:20px;border-top:1px solid var(--border);padding-top:10px;margin-top:4px"><span>সর্বমোট</span><span class="mono" style="color:#4caf50">৳{{ bill.grand_total|floatformat:2 }}</span></div>
+    <div style="display:flex;justify-content:space-between;font-weight:700;font-size:22px;border-top:1px solid var(--border);padding-top:10px"><span>সর্বমোট</span><span class="mono" style="color:#4caf50">৳{{ bill.grand_total|floatformat:2 }}</span></div>
     <div style="margin-top:14px"><span class="tag {% if bill.status == 'paid' %}tag-green{% elif bill.status == 'pending' %}tag-orange{% else %}tag-gray{% endif %}">{{ bill.get_status_display }}</span></div>
     {% if bill.notes %}<div style="margin-top:12px;padding:10px;background:rgba(0,188,212,0.04);border-radius:6px;font-size:13px;color:var(--muted)">{{ bill.notes }}</div>{% endif %}
   </div>
