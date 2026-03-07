@@ -1,40 +1,44 @@
 {% extends "pharmacy/base.html" %}
 {% block title %}{{ customer.name }}{% endblock %}
 {% block nav_cust %}active{% endblock %}
-{% block bn_cust %}active{% endblock %}
 {% block breadcrumb %}রোগী / {{ customer.name }}{% endblock %}
 {% block content %}
 <div class="page-header">
   <div><div class="page-title">{{ customer.name }}</div><div class="page-sub">রোগীর প্রোফাইল</div></div>
-  <div class="page-actions"><a href="{% url 'customer_list' %}" class="btn btn-ghost btn-sm">← ফিরে</a><a href="{% url 'customer_edit' customer.pk %}" class="btn btn-primary">✏️ সম্পাদনা</a></div>
+  <div style="display:flex;gap:8px"><a href="{% url 'customer_list' %}" class="btn btn-ghost">← ফিরে</a><a href="{% url 'customer_edit' customer.pk %}" class="btn btn-primary">✏️ সম্পাদনা</a></div>
 </div>
 <div class="grid-2" style="align-items:start">
-  <div class="card card-body">
-    <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);text-transform:uppercase;margin-bottom:12px">তথ্য</div>
-    <div style="display:flex;flex-direction:column;gap:9px;font-size:14px">
-      <div style="display:flex;gap:10px"><span style="color:var(--muted);width:80px;flex-shrink:0">ফোন</span><span>{{ customer.phone|default:"—" }}</span></div>
-      <div style="display:flex;gap:10px"><span style="color:var(--muted);width:80px;flex-shrink:0">ইমেইল</span><span style="word-break:break-all">{{ customer.email|default:"—" }}</span></div>
-      <div style="display:flex;gap:10px"><span style="color:var(--muted);width:80px;flex-shrink:0">ঠিকানা</span><span>{{ customer.address|default:"—" }}</span></div>
-      <div style="display:flex;gap:10px"><span style="color:var(--muted);width:80px;flex-shrink:0">জন্ম তারিখ</span><span>{{ customer.date_of_birth|default:"—" }}</span></div>
-    </div>
-    <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div style="background:rgba(0,188,212,0.05);border:1px solid rgba(0,188,212,0.15);border-radius:7px;padding:12px;text-align:center"><div class="mono" style="font-size:18px;color:#4caf50">৳{{ customer.total_purchases|floatformat:0 }}</div><div style="font-size:11px;color:var(--muted);margin-top:3px">মোট কেনা</div></div>
-      <div style="background:rgba(0,188,212,0.05);border:1px solid rgba(0,188,212,0.15);border-radius:7px;padding:12px;text-align:center"><div class="mono" style="font-size:18px;color:var(--accent)">{{ bills|length }}</div><div style="font-size:11px;color:var(--muted);margin-top:3px">চালান সংখ্যা</div></div>
+  <div>
+    <div class="card card-body" style="margin-bottom:14px">
+      <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px">তথ্য</div>
+      <div style="display:flex;flex-direction:column;gap:9px;font-size:14px">
+        <div style="display:flex;gap:10px"><span style="color:var(--muted);width:90px;flex-shrink:0">ফোন</span><span>{{ customer.phone|default:"—" }}</span></div>
+        <div style="display:flex;gap:10px"><span style="color:var(--muted);width:90px;flex-shrink:0">ইমেইল</span><span>{{ customer.email|default:"—" }}</span></div>
+        <div style="display:flex;gap:10px"><span style="color:var(--muted);width:90px;flex-shrink:0">ঠিকানা</span><span>{{ customer.address|default:"—" }}</span></div>
+        <div style="display:flex;gap:10px"><span style="color:var(--muted);width:90px;flex-shrink:0">জন্ম তারিখ</span><span>{{ customer.date_of_birth|default:"—" }}</span></div>
+      </div>
+      <div style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div style="background:rgba(0,188,212,0.05);border:1px solid rgba(0,188,212,0.15);border-radius:7px;padding:12px;text-align:center"><div class="mono" style="font-size:20px;color:#4caf50">৳{{ customer.total_purchases|floatformat:0 }}</div><div style="font-size:11px;color:var(--muted);margin-top:3px">মোট কেনাকাটা</div></div>
+        <div style="background:rgba(0,188,212,0.05);border:1px solid rgba(0,188,212,0.15);border-radius:7px;padding:12px;text-align:center"><div class="mono" style="font-size:20px;color:var(--accent)">{{ bills|length }}</div><div style="font-size:11px;color:var(--muted);margin-top:3px">চালান সংখ্যা</div></div>
+      </div>
     </div>
   </div>
   <div class="card">
-    <div class="card-header"><span class="card-title">কেনাকাটার ইতিহাস</span><a href="{% url 'bill_create' %}" class="btn btn-success btn-sm">+ বিক্রয়</a></div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>চালান</th><th>তারিখ</th><th>মোট</th><th class="hide-xs">স্ট্যাটাস</th></tr></thead>
-        <tbody>
-          {% for bill in bills %}
-          <tr><td><a href="{% url 'bill_detail' bill.pk %}" class="mono" style="color:var(--accent);font-size:12px">{{ bill.invoice_number }}</a></td><td style="color:var(--muted);font-size:12px">{{ bill.bill_date|date:"d M Y" }}</td><td class="mono" style="color:#4caf50">৳{{ bill.grand_total|floatformat:0 }}</td><td class="hide-xs"><span class="tag {% if bill.status == 'paid' %}tag-green{% elif bill.status == 'pending' %}tag-orange{% else %}tag-gray{% endif %}">{{ bill.get_status_display }}</span></td></tr>
-          {% empty %}<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px">কোনো কেনাকাটা নেই</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+    <div class="card-header"><span class="card-title">কেনাকাটার ইতিহাস</span><a href="{% url 'bill_create' %}" class="btn btn-success btn-sm">+ নতুন বিক্রয়</a></div>
+    <table>
+      <thead><tr><th>চালান</th><th>তারিখ</th><th>মোট</th><th>স্ট্যাটাস</th></tr></thead>
+      <tbody>
+        {% for bill in bills %}
+        <tr>
+          <td><a href="{% url 'bill_detail' bill.pk %}" class="mono" style="color:var(--accent);font-size:12px">{{ bill.invoice_number }}</a></td>
+          <td style="color:var(--muted);font-size:12px">{{ bill.bill_date|date:"d M Y" }}</td>
+          <td class="mono" style="color:#4caf50;font-weight:700">৳{{ bill.grand_total|floatformat:2 }}</td>
+          <td><span class="tag {% if bill.status == 'paid' %}tag-green{% elif bill.status == 'pending' %}tag-orange{% else %}tag-gray{% endif %}">{{ bill.get_status_display }}</span></td>
+        </tr>
+        {% empty %}<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px">কোনো কেনাকাটার ইতিহাস নেই</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
 </div>
 {% endblock %}

@@ -1,7 +1,6 @@
 {% extends "pharmacy/base.html" %}
 {% block title %}Dashboard{% endblock %}
 {% block nav_dash %}active{% endblock %}
-{% block bn_dash %}active{% endblock %}
 {% block breadcrumb %}Dashboard — পল মেডিকো{% endblock %}
 
 {% block content %}
@@ -10,12 +9,9 @@
     <div class="page-title">DASHBOARD</div>
     <div class="page-sub">পল মেডিকো — মৌলভীবাজার</div>
   </div>
-  <div class="page-actions">
-    <a href="{% url 'bill_create' %}" class="btn btn-success">🛒 নতুন বিক্রয়</a>
-  </div>
 </div>
 
-<div class="grid-4" style="margin-bottom:16px">
+<div class="grid-4" style="margin-bottom:20px">
   <div class="card stat-card" style="--acc:#00bcd4">
     <div class="stat-label">মোট ওষুধ</div>
     <div class="stat-value">{{ total_medicines }}</div>
@@ -23,49 +19,45 @@
   </div>
   <div class="card stat-card" style="--acc:#4caf50">
     <div class="stat-label">মাসিক বিক্রয়</div>
-    <div class="stat-value" style="font-size:16px">৳{{ monthly_revenue|floatformat:0 }}</div>
+    <div class="stat-value">৳{{ monthly_revenue|floatformat:0 }}</div>
     <div class="stat-sub">এই মাসে</div>
   </div>
   <div class="card stat-card" style="--acc:#ab47bc">
-    <div class="stat-label">আজকের আয়</div>
-    <div class="stat-value" style="font-size:16px">৳{{ today_revenue|floatformat:0 }}</div>
+    <div class="stat-label">আজকের বিক্রয়</div>
+    <div class="stat-value">৳{{ today_revenue|floatformat:0 }}</div>
     <div class="stat-sub">আজ</div>
   </div>
   <div class="card stat-card" style="--acc:#ff9800">
     <div class="stat-label">কম স্টক</div>
     <div class="stat-value">{{ low_stock_count }}</div>
-    <div class="stat-sub">পুনর্মজুদ দরকার</div>
+    <div class="stat-sub">পুনর্মজুদ প্রয়োজন</div>
   </div>
 </div>
 
-<div class="grid-2" style="margin-bottom:16px">
+<div class="grid-2" style="margin-bottom:20px">
   <div class="card">
     <div class="card-header"><span class="card-title">মাসিক বিক্রয় (৳)</span></div>
-    <div class="card-body"><canvas id="chart" height="140"></canvas></div>
+    <div class="card-body"><canvas id="chart" height="150"></canvas></div>
   </div>
   <div class="card">
     <div class="card-header">
       <span class="card-title">সাম্প্রতিক চালান</span>
       <a href="{% url 'bill_list' %}" class="btn btn-ghost btn-sm">সব দেখুন</a>
     </div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>চালান</th><th>মোট</th><th class="hide-xs">স্ট্যাটাস</th></tr></thead>
-        <tbody>
-          {% for bill in recent_bills %}
-          <tr>
-            <td>
-              <a href="{% url 'bill_detail' bill.pk %}" class="mono" style="color:var(--accent);font-size:11px">{{ bill.invoice_number }}</a>
-              <div style="font-size:11px;color:var(--muted)">{{ bill.customer.name|default:"Walk-in"|truncatechars:14 }}</div>
-            </td>
-            <td class="mono" style="color:#4caf50;font-weight:700;font-size:13px">৳{{ bill.grand_total|floatformat:0 }}</td>
-            <td class="hide-xs"><span class="tag {% if bill.status == 'paid' %}tag-green{% elif bill.status == 'pending' %}tag-orange{% else %}tag-gray{% endif %}">{{ bill.get_status_display }}</span></td>
-          </tr>
-          {% empty %}<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:20px">কোনো চালান নেই</td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+    <table>
+      <thead><tr><th>চালান নং</th><th>কাস্টমার</th><th>মোট</th><th>স্ট্যাটাস</th></tr></thead>
+      <tbody>
+        {% for bill in recent_bills %}
+        <tr>
+          <td><a href="{% url 'bill_detail' bill.pk %}" class="mono" style="color:var(--accent);font-size:12px">{{ bill.invoice_number }}</a></td>
+          <td style="font-size:13px">{{ bill.customer.name|default:"Walk-in" }}</td>
+          <td class="mono" style="color:#4caf50;font-weight:700">৳{{ bill.grand_total|floatformat:0 }}</td>
+          <td><span class="tag {% if bill.status == 'paid' %}tag-green{% elif bill.status == 'pending' %}tag-orange{% else %}tag-gray{% endif %}">{{ bill.get_status_display }}</span></td>
+        </tr>
+        {% empty %}<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px">কোনো চালান নেই</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
 </div>
 
@@ -73,44 +65,41 @@
   {% if low_stock_medicines %}
   <div class="card">
     <div class="card-header">
-      <span class="card-title">⚠️ কম স্টক</span>
+      <span class="card-title">⚠️ কম স্টক সতর্কতা</span>
       <a href="{% url 'medicine_list' %}?stock=low" class="btn btn-ghost btn-sm">সব দেখুন</a>
     </div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>ওষুধ</th><th>স্টক</th></tr></thead>
-        <tbody>
-          {% for med in low_stock_medicines %}
-          <tr>
-            <td><a href="{% url 'medicine_detail' med.pk %}" style="color:var(--text);text-decoration:none;font-size:13px">{{ med.name }} {{ med.strength }}</a></td>
-            <td><span class="tag tag-orange">{{ med.stock_quantity }}</span></td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+    <table>
+      <thead><tr><th>ওষুধ</th><th>স্টক</th><th>রিঅর্ডার</th></tr></thead>
+      <tbody>
+        {% for med in low_stock_medicines %}
+        <tr>
+          <td><a href="{% url 'medicine_detail' med.pk %}" style="color:var(--text);text-decoration:none;font-size:13px">{{ med.name }} {{ med.strength }}</a></td>
+          <td><span class="tag tag-orange">{{ med.stock_quantity }}</span></td>
+          <td style="color:var(--muted);font-size:12px">{{ med.reorder_level }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
   {% endif %}
 
   {% if expiring_soon %}
   <div class="card">
     <div class="card-header">
-      <span class="card-title">📅 মেয়াদ শেষ হচ্ছে</span>
+      <span class="card-title">📅 মেয়াদোত্তীর্ণ হতে চলেছে</span>
       <a href="{% url 'medicine_list' %}?stock=expiring" class="btn btn-ghost btn-sm">সব দেখুন</a>
     </div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>ওষুধ</th><th>মেয়াদ</th></tr></thead>
-        <tbody>
-          {% for med in expiring_soon %}
-          <tr>
-            <td style="font-size:13px">{{ med.name }} {{ med.strength }}</td>
-            <td><span class="tag tag-red">{{ med.expiry_date }}</span></td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+    <table>
+      <thead><tr><th>ওষুধ</th><th>মেয়াদ শেষ</th></tr></thead>
+      <tbody>
+        {% for med in expiring_soon %}
+        <tr>
+          <td style="font-size:13px">{{ med.name }} {{ med.strength }}</td>
+          <td><span class="tag tag-red">{{ med.expiry_date }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
   {% endif %}
 </div>
@@ -119,33 +108,28 @@
 {% block extra_js %}
 <script>
 const data = {{ chart_data|safe }};
-function drawChart() {
-  const c = document.getElementById('chart');
-  const W = c.parentElement.clientWidth - 4;
-  const H = 140;
-  c.width = W; c.height = H;
-  const ctx = c.getContext('2d');
-  const max = Math.max(...data.map(d => d.revenue), 1);
-  const bw = W / data.length;
-  data.forEach((d, i) => {
-    const h = Math.max((d.revenue / max) * (H - 36), d.revenue > 0 ? 2 : 0);
-    const x = i * bw + bw * 0.12; const w = bw * 0.76; const y = H - h - 18;
-    const g = ctx.createLinearGradient(0, y, 0, H - 18);
-    const last = i === data.length - 1;
-    g.addColorStop(0, last ? '#00bcd4' : 'rgba(0,188,212,0.35)');
-    g.addColorStop(1, 'rgba(0,188,212,0.03)');
-    ctx.fillStyle = g; ctx.beginPath();
-    if (ctx.roundRect) ctx.roundRect(x, y, w, h, [3,3,0,0]); else ctx.rect(x, y, w, h);
-    ctx.fill();
-    ctx.fillStyle = '#5a7080'; ctx.font = '8px Space Mono'; ctx.textAlign = 'center';
-    ctx.fillText(d.month, x + w/2, H - 3);
-    if (d.revenue > 0) {
-      ctx.fillStyle = last ? '#00bcd4' : '#5a7080';
-      ctx.fillText('৳' + Math.round(d.revenue/1000) + 'k', x + w/2, y - 3);
-    }
-  });
-}
-drawChart();
-window.addEventListener('resize', drawChart);
+const c = document.getElementById('chart');
+const ctx = c.getContext('2d');
+const W = c.offsetWidth; const H = 150;
+c.width = W; c.height = H;
+const max = Math.max(...data.map(d => d.revenue), 1);
+const bw = W / data.length;
+data.forEach((d, i) => {
+  const h = Math.max((d.revenue / max) * (H - 36), d.revenue > 0 ? 2 : 0);
+  const x = i * bw + bw * 0.15; const w = bw * 0.7; const y = H - h - 18;
+  const g = ctx.createLinearGradient(0, y, 0, H - 18);
+  const isLast = i === data.length - 1;
+  g.addColorStop(0, isLast ? '#00bcd4' : 'rgba(0,188,212,0.4)');
+  g.addColorStop(1, 'rgba(0,188,212,0.04)');
+  ctx.fillStyle = g; ctx.beginPath();
+  ctx.roundRect ? ctx.roundRect(x, y, w, h, [3,3,0,0]) : ctx.rect(x, y, w, h);
+  ctx.fill();
+  ctx.fillStyle = '#5a7080'; ctx.font = '9px Space Mono'; ctx.textAlign = 'center';
+  ctx.fillText(d.month, x + w/2, H - 3);
+  if (d.revenue > 0) {
+    ctx.fillStyle = isLast ? '#00bcd4' : '#5a7080';
+    ctx.fillText('৳' + Math.round(d.revenue/1000) + 'k', x + w/2, y - 4);
+  }
+});
 </script>
 {% endblock %}

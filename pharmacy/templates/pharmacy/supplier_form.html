@@ -3,12 +3,12 @@
 {% block nav_sup %}active{% endblock %}
 {% block breadcrumb %}সাপ্লায়ার / {{ title }}{% endblock %}
 {% block content %}
-<div class="page-header"><div><div class="page-title">{{ title|upper }}</div></div><a href="{% url 'supplier_list' %}" class="btn btn-ghost btn-sm">← ফিরে</a></div>
-<div class="card card-body"><form method="post">{% csrf_token %}
+<div class="page-header"><div><div class="page-title">{{ title|upper }}</div></div><a href="{% url 'supplier_list' %}" class="btn btn-ghost">← ফিরে</a></div>
+<div style="max-width:540px"><div class="card card-body"><form method="post">{% csrf_token %}
   <div class="form-group"><label class="form-label">প্রতিষ্ঠানের নাম *</label>{{ form.name }}</div>
   <div class="grid-2"><div class="form-group"><label class="form-label">যোগাযোগ ব্যক্তি</label>{{ form.contact_person }}</div><div class="form-group"><label class="form-label">স্ট্যাটাস</label>{{ form.status }}</div></div>
   <div class="grid-2"><div class="form-group"><label class="form-label">ফোন</label>{{ form.phone }}</div><div class="form-group"><label class="form-label">ইমেইল</label>{{ form.email }}</div></div>
   <div class="form-group"><label class="form-label">ঠিকানা</label>{{ form.address }}</div>
-  <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap"><a href="{% url 'supplier_list' %}" class="btn btn-ghost">বাতিল</a><button type="submit" class="btn btn-primary">💾 সংরক্ষণ</button></div>
-</form></div>
+  <div style="display:flex;gap:10px;justify-content:flex-end"><a href="{% url 'supplier_list' %}" class="btn btn-ghost">বাতিল</a><button type="submit" class="btn btn-primary">💾 সংরক্ষণ</button></div>
+</form></div></div>
 {% endblock %}

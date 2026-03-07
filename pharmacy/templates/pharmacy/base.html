@@ -3,9 +3,7 @@
 <html lang="bn">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <meta name="theme-color" content="#0b0f1a">
-  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}পল মেডিকো{% endblock %} — POL MEDICO</title>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <style>
@@ -21,343 +19,166 @@
       --danger: #f44336;
       --warning: #ff9800;
       --success: #4caf50;
-      --sidebar-w: 240px;
-      --topbar-h: 54px;
-      --bottom-nav-h: 62px;
+      --taka: '৳';
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-    body { font-family: 'Hind Siliguri', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
-    ::-webkit-scrollbar { width: 3px; } ::-webkit-scrollbar-track { background: var(--surface); } ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Hind Siliguri', sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+    ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: var(--surface); } ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
     .mono { font-family: 'Space Mono', monospace; }
 
-    /* ── OVERLAY ─────────────────────────────── */
-    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 199; backdrop-filter: blur(2px); }
-    .overlay.open { display: block; }
-
-    /* ── SIDEBAR ─────────────────────────────── */
-    .sidebar {
-      width: var(--sidebar-w);
-      background: var(--surface);
-      border-right: 1px solid var(--border);
-      display: flex; flex-direction: column;
-      position: fixed; top: 0; left: 0; height: 100vh;
-      z-index: 200;
-      transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
-    }
-    .sidebar-logo { padding: 18px 16px 14px; border-bottom: 1px solid var(--border); }
-    .logo-en { font-family: 'Space Mono', monospace; font-size: 15px; color: var(--accent); letter-spacing: 0.1em; text-shadow: 0 0 12px rgba(0,188,212,0.4); }
+    /* Sidebar */
+    .sidebar { width: 240px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; height: 100vh; z-index: 100; }
+    .sidebar-logo { padding: 20px 18px 16px; border-bottom: 1px solid var(--border); }
+    .logo-en { font-family: 'Space Mono', monospace; font-size: 16px; color: var(--accent); letter-spacing: 0.1em; text-shadow: 0 0 12px rgba(0,188,212,0.4); }
     .logo-bn { font-size: 14px; color: var(--accent2); font-weight: 600; margin-top: 1px; }
     .logo-sub { font-size: 10px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
-    nav { flex: 1; padding: 12px 8px; overflow-y: auto; }
-    .nav-section { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; padding: 10px 10px 5px; font-family: 'Space Mono', monospace; }
-    .nav-link { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; color: var(--muted); text-decoration: none; font-size: 13.5px; font-weight: 500; margin-bottom: 1px; transition: all 0.15s; min-height: 44px; }
-    .nav-link:hover, .nav-link:active { background: rgba(0,188,212,0.06); color: var(--text); }
+    nav { flex: 1; padding: 14px 10px; overflow-y: auto; }
+    .nav-section { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; padding: 10px 10px 6px; font-family: 'Space Mono', monospace; }
+    .nav-link { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 7px; color: var(--muted); text-decoration: none; font-size: 13.5px; font-weight: 500; margin-bottom: 2px; transition: all 0.15s; }
+    .nav-link:hover { background: rgba(0,188,212,0.06); color: var(--text); }
     .nav-link.active { background: rgba(0,188,212,0.12); color: var(--accent); box-shadow: inset 2px 0 0 var(--accent); font-weight: 600; }
-    .nav-link .icon { font-size: 17px; width: 22px; text-align: center; flex-shrink: 0; }
-    .sidebar-user { padding: 12px; border-top: 1px solid var(--border); }
+    .nav-link .icon { font-size: 16px; width: 22px; text-align: center; }
+    .sidebar-user { padding: 14px; border-top: 1px solid var(--border); }
     .user-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-    .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--bg); flex-shrink: 0; font-family: 'Space Mono', monospace; }
+    .user-avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: var(--bg); flex-shrink: 0; font-family: 'Space Mono', monospace; }
     .user-name { font-size: 13px; font-weight: 600; }
     .user-role { font-size: 11px; color: var(--muted); }
 
-    /* ── TOPBAR ──────────────────────────────── */
-    .topbar {
-      position: fixed; top: 0; right: 0; left: 0;
-      height: var(--topbar-h);
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      display: flex; align-items: center;
-      padding: 0 16px;
-      z-index: 100;
-      gap: 12px;
-    }
-    .hamburger {
-      display: none;
-      background: none; border: none; cursor: pointer;
-      padding: 6px; color: var(--text);
-      flex-shrink: 0; border-radius: 6px;
-    }
-    .hamburger:active { background: rgba(255,255,255,0.05); }
-    .hamburger svg { display: block; }
-    .topbar-title { font-family: 'Space Mono', monospace; font-size: 12px; color: var(--accent); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .topbar-right { font-size: 11px; color: var(--muted); white-space: nowrap; flex-shrink: 0; }
+    /* Main */
+    .main { margin-left: 240px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+    .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 12px 28px; display: flex; align-items: center; justify-content: space-between; }
+    .topbar-left { font-size: 12px; color: var(--muted); font-family: 'Space Mono', monospace; }
+    .topbar-right { font-size: 12px; color: var(--muted); }
+    .content { padding: 24px 28px; flex: 1; }
 
-    /* ── MAIN ────────────────────────────────── */
-    .main {
-      margin-left: var(--sidebar-w);
-      padding-top: var(--topbar-h);
-      min-height: 100vh;
-    }
-    .content { padding: 20px 24px 30px; }
-
-    /* ── BOTTOM NAV (mobile only) ─────────────── */
-    .bottom-nav {
-      display: none;
-      position: fixed; bottom: 0; left: 0; right: 0;
-      height: var(--bottom-nav-h);
-      background: var(--surface);
-      border-top: 1px solid var(--border);
-      z-index: 150;
-      padding: 0 4px;
-      padding-bottom: env(safe-area-inset-bottom);
-    }
-    .bottom-nav-inner { display: flex; height: 62px; align-items: center; }
-    .bn-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; color: var(--muted); padding: 6px 4px; border-radius: 8px; transition: all 0.15s; min-height: 44px; }
-    .bn-item.active { color: var(--accent); }
-    .bn-item .bn-icon { font-size: 20px; line-height: 1; }
-    .bn-item .bn-label { font-size: 9px; font-family: 'Hind Siliguri', sans-serif; white-space: nowrap; font-weight: 500; }
-    .bn-item:active { background: rgba(0,188,212,0.06); }
-
-    /* ── CARDS ───────────────────────────────── */
+    /* Cards */
     .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; }
-    .card-body { padding: 16px 18px; }
-    .card-header { padding: 12px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+    .card-body { padding: 18px 22px; }
+    .card-header { padding: 14px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
     .card-title { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
 
-    /* ── BUTTONS ─────────────────────────────── */
-    .btn { border: none; border-radius: 7px; cursor: pointer; font-family: 'Hind Siliguri', sans-serif; font-size: 13px; font-weight: 600; padding: 9px 16px; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; white-space: nowrap; min-height: 38px; touch-action: manipulation; -webkit-user-select: none; }
+    /* Buttons */
+    .btn { border: none; border-radius: 6px; cursor: pointer; font-family: 'Hind Siliguri', sans-serif; font-size: 13px; font-weight: 600; padding: 8px 16px; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; white-space: nowrap; }
     .btn-primary { background: linear-gradient(135deg, var(--accent), #0097a7); color: #fff; }
-    .btn-primary:active { opacity: 0.85; }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
     .btn-success { background: linear-gradient(135deg, var(--accent2), #388e3c); color: #fff; }
-    .btn-success:active { opacity: 0.85; }
+    .btn-success:hover { opacity: 0.9; }
     .btn-danger { background: rgba(244,67,54,0.12); color: var(--danger); border: 1px solid rgba(244,67,54,0.25); }
+    .btn-danger:hover { background: rgba(244,67,54,0.22); }
     .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
-    .btn-ghost:active { border-color: var(--accent); color: var(--accent); }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-sm { padding: 5px 10px; font-size: 12px; }
     .btn-warning { background: rgba(255,152,0,0.12); color: var(--warning); border: 1px solid rgba(255,152,0,0.25); }
-    .btn-sm { padding: 5px 10px; font-size: 12px; min-height: 32px; }
 
-    /* ── TAGS ────────────────────────────────── */
-    .tag { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 10px; font-weight: 600; font-family: 'Space Mono', monospace; white-space: nowrap; }
+    /* Tags */
+    .tag { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 10px; font-weight: 600; font-family: 'Space Mono', monospace; }
     .tag-blue { background: rgba(0,188,212,0.1); color: var(--accent); border: 1px solid rgba(0,188,212,0.2); }
     .tag-green { background: rgba(76,175,80,0.1); color: var(--accent2); border: 1px solid rgba(76,175,80,0.2); }
     .tag-red { background: rgba(244,67,54,0.1); color: var(--danger); border: 1px solid rgba(244,67,54,0.2); }
     .tag-orange { background: rgba(255,152,0,0.1); color: var(--warning); border: 1px solid rgba(255,152,0,0.2); }
     .tag-gray { background: rgba(90,112,128,0.1); color: var(--muted); border: 1px solid rgba(90,112,128,0.2); }
 
-    /* ── TABLES → mobile cards ───────────────── */
+    /* Tables */
     table { width: 100%; border-collapse: collapse; }
-    th { text-align: left; padding: 9px 12px; font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid var(--border); font-family: 'Space Mono', monospace; white-space: nowrap; }
+    th { text-align: left; padding: 9px 12px; font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid var(--border); font-family: 'Space Mono', monospace; }
     td { padding: 10px 12px; font-size: 13px; border-bottom: 1px solid rgba(28,45,66,0.4); vertical-align: middle; }
     tr:last-child td { border-bottom: none; }
-    .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    tr:hover td { background: rgba(0,188,212,0.02); }
 
-    /* ── FORMS ───────────────────────────────── */
+    /* Forms */
     .form-group { margin-bottom: 14px; }
     .form-label { display: block; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px; font-family: 'Space Mono', monospace; }
-    .form-input { background: var(--bg); border: 1px solid var(--border); border-radius: 7px; color: var(--text); font-family: 'Hind Siliguri', sans-serif; font-size: 14px; padding: 10px 12px; outline: none; transition: border-color 0.2s; width: 100%; min-height: 44px; }
+    .form-input { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: 'Hind Siliguri', sans-serif; font-size: 13.5px; padding: 9px 12px; outline: none; transition: border-color 0.2s; width: 100%; }
     .form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(0,188,212,0.1); }
     select.form-input option { background: var(--bg); }
-    textarea.form-input { resize: vertical; min-height: 80px; }
+    textarea.form-input { resize: vertical; }
 
-    /* ── ALERTS ──────────────────────────────── */
+    /* Alerts */
     .messages { margin-bottom: 14px; }
     .alert { padding: 10px 14px; border-radius: 7px; font-size: 13px; margin-bottom: 8px; border: 1px solid; }
     .alert-success { background: rgba(76,175,80,0.07); border-color: rgba(76,175,80,0.2); color: var(--accent2); }
     .alert-error, .alert-danger { background: rgba(244,67,54,0.07); border-color: rgba(244,67,54,0.2); color: var(--danger); }
     .alert-warning { background: rgba(255,152,0,0.07); border-color: rgba(255,152,0,0.2); color: var(--warning); }
 
-    /* ── GRID ────────────────────────────────── */
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    /* Layout helpers */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
     .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    @media (max-width: 900px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 600px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } }
 
-    /* ── STAT CARDS ──────────────────────────── */
-    .stat-card { padding: 16px 18px; position: relative; overflow: hidden; }
+    /* Page header */
+    .page-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+    .page-title { font-family: 'Space Mono', monospace; font-size: 14px; color: var(--accent); text-shadow: 0 0 10px rgba(0,188,212,0.35); }
+    .page-sub { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+    /* Stat cards */
+    .stat-card { padding: 18px 20px; position: relative; overflow: hidden; }
     .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--acc, var(--accent)); }
-    .stat-label { font-size: 10px; color: var(--muted); font-family: 'Space Mono', monospace; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 5px; }
-    .stat-value { font-size: 22px; font-weight: 700; font-family: 'Space Mono', monospace; color: var(--acc, var(--accent)); line-height: 1; }
+    .stat-label { font-size: 10px; color: var(--muted); font-family: 'Space Mono', monospace; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+    .stat-value { font-size: 24px; font-weight: 700; font-family: 'Space Mono', monospace; color: var(--acc, var(--accent)); line-height: 1; }
     .stat-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
 
-    /* ── PAGE HEADER ─────────────────────────── */
-    .page-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 18px; flex-wrap: wrap; gap: 10px; }
-    .page-title { font-family: 'Space Mono', monospace; font-size: 13px; color: var(--accent); text-shadow: 0 0 10px rgba(0,188,212,0.35); }
-    .page-sub { font-size: 12px; color: var(--muted); margin-top: 3px; }
-    .page-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-
-    /* ── SEARCH ──────────────────────────────── */
+    /* Search */
     .search-wrap { position: relative; }
     .search-wrap input { padding-left: 34px; }
     .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; font-size: 14px; }
 
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     .animate { animation: fadeUp 0.3s ease forwards; }
-
-    /* ═══════════════════════════════════════════
-       RESPONSIVE BREAKPOINTS
-    ═══════════════════════════════════════════ */
-
-    /* Tablet (≤900px) */
-    @media (max-width: 900px) {
-      :root { --sidebar-w: 220px; }
-      .grid-4 { grid-template-columns: 1fr 1fr; }
-      .grid-3 { grid-template-columns: 1fr 1fr; }
-      .content { padding: 16px 16px 30px; }
-    }
-
-    /* Mobile (≤768px) */
-    @media (max-width: 768px) {
-      /* Show hamburger, hide desktop sidebar */
-      .hamburger { display: flex; align-items: center; justify-content: center; }
-      .sidebar { transform: translateX(-100%); }
-      .sidebar.open { transform: translateX(0); box-shadow: 0 0 40px rgba(0,0,0,0.6); }
-
-      /* Main fills full width */
-      .main { margin-left: 0; padding-bottom: var(--bottom-nav-h); }
-      .topbar { left: 0; }
-      .topbar-right { display: none; }
-
-      /* Show bottom nav */
-      .bottom-nav { display: flex; }
-
-      /* Hide sidebar user logout btn on mobile (use profile page) */
-      .sidebar-user { display: block; }
-
-      /* Grids stack on mobile */
-      .grid-4 { grid-template-columns: 1fr 1fr; gap: 10px; }
-      .grid-3 { grid-template-columns: 1fr 1fr; gap: 10px; }
-      .grid-2 { grid-template-columns: 1fr 1fr; gap: 10px; }
-
-      .content { padding: 14px 12px 16px; }
-      .card-body { padding: 14px 14px; }
-      .card-header { padding: 10px 14px; }
-
-      /* Stat cards smaller on mobile */
-      .stat-value { font-size: 18px; }
-      .stat-card { padding: 12px 14px; }
-      .stat-label { font-size: 9px; }
-
-      /* Page header stacks */
-      .page-header { flex-direction: column; align-items: flex-start; gap: 10px; }
-      .page-actions { width: 100%; }
-    }
-
-    /* Small mobile (≤480px) */
-    @media (max-width: 480px) {
-      .grid-4 { grid-template-columns: 1fr 1fr; }
-      .grid-3 { grid-template-columns: 1fr 1fr; }
-      .grid-2 { grid-template-columns: 1fr; }
-
-      /* Full-width buttons */
-      .page-actions .btn { flex: 1; justify-content: center; }
-
-      /* Table responsive: show only key columns */
-      .hide-xs { display: none; }
-
-      .stat-value { font-size: 17px; }
-    }
-
-    /* Very small (≤360px) */
-    @media (max-width: 360px) {
-      .grid-4, .grid-3 { grid-template-columns: 1fr; }
-      .content { padding: 12px 10px 12px; }
-    }
   </style>
   {% block extra_css %}{% endblock %}
 </head>
 <body>
-
-<!-- Overlay (closes sidebar on mobile) -->
-<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
-
-<!-- ── SIDEBAR ─────────────────────────────────────────────── -->
-<aside class="sidebar" id="sidebar">
-  <div class="sidebar-logo">
-    <div class="logo-en">💊 POL MEDICO</div>
-    <div class="logo-bn">পল মেডিকো</div>
-    <div class="logo-sub">📞 {{ pharmacy.phone }}<br>মৌলভীবাজার</div>
-  </div>
-  <nav>
-    <div class="nav-section">প্রধান মেনু</div>
-    <a href="{% url 'dashboard' %}" class="nav-link {% block nav_dash %}{% endblock %}" onclick="closeSidebar()"><span class="icon">⬡</span> Dashboard</a>
-    <a href="{% url 'medicine_list' %}" class="nav-link {% block nav_med %}{% endblock %}" onclick="closeSidebar()"><span class="icon">💊</span> ওষুধ তালিকা</a>
-    <a href="{% url 'bill_create' %}" class="nav-link {% block nav_sell %}{% endblock %}" onclick="closeSidebar()"><span class="icon">🛒</span> নতুন বিক্রয়</a>
-    <a href="{% url 'bill_list' %}" class="nav-link {% block nav_bill %}{% endblock %}" onclick="closeSidebar()"><span class="icon">🧾</span> বিল / চালান</a>
-    <div class="nav-section">ব্যবস্থাপনা</div>
-    <a href="{% url 'supplier_list' %}" class="nav-link {% block nav_sup %}{% endblock %}" onclick="closeSidebar()"><span class="icon">🏭</span> সাপ্লায়ার</a>
-    <a href="{% url 'customer_list' %}" class="nav-link {% block nav_cust %}{% endblock %}" onclick="closeSidebar()"><span class="icon">👥</span> রোগী / কাস্টমার</a>
-    <a href="{% url 'reports' %}" class="nav-link {% block nav_rep %}{% endblock %}" onclick="closeSidebar()"><span class="icon">📊</span> রিপোর্ট</a>
-    {% if user.is_superuser %}
-    <div class="nav-section">System</div>
-    <a href="{% url 'admin:index' %}" class="nav-link"><span class="icon">⚙️</span> Admin Panel</a>
-    {% endif %}
-  </nav>
-  <div class="sidebar-user">
-    <div class="user-row">
-      <div class="user-avatar">{{ user.username|first|upper }}</div>
-      <div>
-        <div class="user-name">{{ user.username }}</div>
-        <div class="user-role">{% if user.profile %}{{ user.profile.get_role_display }}{% else %}Staff{% endif %}</div>
-      </div>
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-en">POL MEDICO</div>
+      <div class="logo-bn">পল মেডিকো</div>
+      <div class="logo-sub">📞 {{ pharmacy.phone }}<br>মৌলভীবাজার</div>
     </div>
-    <a href="{% url 'logout' %}" class="btn btn-ghost btn-sm" style="width:100%;justify-content:center">লগআউট</a>
-  </div>
-</aside>
-
-<!-- ── MAIN ────────────────────────────────────────────────── -->
-<div class="main">
-  <div class="topbar">
-    <button class="hamburger" id="hamburger" onclick="toggleSidebar()" aria-label="Menu">
-      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-        <rect x="2" y="5" width="18" height="2" rx="1" fill="currentColor"/>
-        <rect x="2" y="10" width="18" height="2" rx="1" fill="currentColor"/>
-        <rect x="2" y="15" width="18" height="2" rx="1" fill="currentColor"/>
-      </svg>
-    </button>
-    <span class="topbar-title">{% block breadcrumb %}পল মেডিকো{% endblock %}</span>
-    <span class="topbar-right">{{ user.username }} · {% now "d M Y" %}</span>
-  </div>
-
-  <div class="content animate">
-    {% if messages %}
-      <div class="messages">
-        {% for msg in messages %}
-          <div class="alert alert-{{ msg.tags }}">{{ msg }}</div>
-        {% endfor %}
+    <nav>
+      <div class="nav-section">Main Menu</div>
+      <a href="{% url 'dashboard' %}" class="nav-link {% block nav_dash %}{% endblock %}"><span class="icon">⬡</span> Dashboard</a>
+      <a href="{% url 'medicine_list' %}" class="nav-link {% block nav_med %}{% endblock %}"><span class="icon">💊</span> ওষুধ তালিকা</a>
+      <a href="{% url 'bill_create' %}" class="nav-link {% block nav_sell %}{% endblock %}"><span class="icon">🛒</span> নতুন বিক্রয়</a>
+      <a href="{% url 'bill_list' %}" class="nav-link {% block nav_bill %}{% endblock %}"><span class="icon">🧾</span> বিল / চালান</a>
+      <div class="nav-section">Management</div>
+      <a href="{% url 'supplier_list' %}" class="nav-link {% block nav_sup %}{% endblock %}"><span class="icon">🏭</span> সাপ্লায়ার</a>
+      <a href="{% url 'customer_list' %}" class="nav-link {% block nav_cust %}{% endblock %}"><span class="icon">👥</span> রোগী / কাস্টমার</a>
+      <a href="{% url 'reports' %}" class="nav-link {% block nav_rep %}{% endblock %}"><span class="icon">📊</span> রিপোর্ট</a>
+      {% if user.is_superuser %}
+      <div class="nav-section">System</div>
+      <a href="{% url 'admin:index' %}" class="nav-link"><span class="icon">⚙️</span> Admin Panel</a>
+      {% endif %}
+    </nav>
+    <div class="sidebar-user">
+      <div class="user-row">
+        <div class="user-avatar">{{ user.username|first|upper }}</div>
+        <div>
+          <div class="user-name">{{ user.username }}</div>
+          <div class="user-role">{% if user.profile %}{{ user.profile.get_role_display }}{% else %}Staff{% endif %}</div>
+        </div>
       </div>
-    {% endif %}
-    {% block content %}{% endblock %}
-  </div>
-</div>
+      <a href="{% url 'logout' %}" class="btn btn-ghost btn-sm" style="width:100%;justify-content:center">লগআউট</a>
+    </div>
+  </aside>
 
-<!-- ── BOTTOM NAV (mobile) ────────────────────────────────── -->
-<nav class="bottom-nav">
-  <div class="bottom-nav-inner">
-    <a href="{% url 'dashboard' %}" class="bn-item {% block bn_dash %}{% endblock %}">
-      <span class="bn-icon">⬡</span><span class="bn-label">হোম</span>
-    </a>
-    <a href="{% url 'medicine_list' %}" class="bn-item {% block bn_med %}{% endblock %}">
-      <span class="bn-icon">💊</span><span class="bn-label">ওষুধ</span>
-    </a>
-    <a href="{% url 'bill_create' %}" class="bn-item {% block bn_sell %}{% endblock %}" style="position:relative">
-      <span style="background:linear-gradient(135deg,var(--accent),#0097a7);border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 2px 12px rgba(0,188,212,0.4);margin-top:-8px">🛒</span>
-      <span class="bn-label" style="margin-top:2px">বিক্রয়</span>
-    </a>
-    <a href="{% url 'customer_list' %}" class="bn-item {% block bn_cust %}{% endblock %}">
-      <span class="bn-icon">👥</span><span class="bn-label">রোগী</span>
-    </a>
-    <a href="{% url 'reports' %}" class="bn-item {% block bn_rep %}{% endblock %}">
-      <span class="bn-icon">📊</span><span class="bn-label">রিপোর্ট</span>
-    </a>
+  <div class="main">
+    <div class="topbar">
+      <span class="topbar-left">{% block breadcrumb %}পল মেডিকো{% endblock %}</span>
+      <span class="topbar-right">{{ user.username }} · {% now "d M Y, H:i" %}</span>
+    </div>
+    <div class="content animate">
+      {% if messages %}
+        <div class="messages">
+          {% for msg in messages %}
+            <div class="alert alert-{{ msg.tags }}">{{ msg }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+      {% block content %}{% endblock %}
+    </div>
   </div>
-</nav>
-
-<script>
-function toggleSidebar() {
-  const s = document.getElementById('sidebar');
-  const o = document.getElementById('overlay');
-  s.classList.toggle('open');
-  o.classList.toggle('open');
-  document.body.style.overflow = s.classList.contains('open') ? 'hidden' : '';
-}
-function closeSidebar() {
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('overlay').classList.remove('open');
-  document.body.style.overflow = '';
-}
-// Close on back gesture / resize
-window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
-</script>
-{% block extra_js %}{% endblock %}
+  {% block extra_js %}{% endblock %}
 </body>
 </html>
